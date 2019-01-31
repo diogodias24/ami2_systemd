@@ -1,0 +1,43 @@
+version: '3.5'
+
+services:
+  database_mariadb:
+      image: mariadb
+      container_name: mariadb_amazon
+      environment: 
+        - MYSQL_ROOT_PASSWORD=password
+        - MYSQL_DATABASE=database_test
+        - MYSQL_USER=user
+        - MYSQL_PASSWORD=user
+      ports:
+        - "33060:3306"
+      restart: on-failure
+  
+  nginx_apache:
+    container_name: ami2-amazon
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
+    links:
+      - database_mariadb
+    ports:
+      - "80:80/tcp"
+      - "443:443/tcp"
+    tmpfs:
+      - /run
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    environment:
+      - TZ=Europe/Lisbon
+      - container=docker
+    build: 
+      context: ./
+      dockerfile: Dockerfile
+
+    restart: on-failure
+    stdin_open: true
+    tty: true
+    privileged: true
+
+
